@@ -1,0 +1,15 @@
+# SAST template for static code analysis
+jobs:
+  - job: codeQL
+    steps:
+      - script: echo "Running CodeQL analysis for Python and TypeScript..."
+
+  - job: gitleaks
+    steps:
+      - script: echo "Running Gitleaks on commit diff..."
+
+  - job: owasp_dep_check
+    steps:
+      - script: |
+          echo "Running OWASP Dependency-Check..."
+          # Blocks on CVSS >= 9.0

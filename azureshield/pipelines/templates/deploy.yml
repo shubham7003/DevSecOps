@@ -1,0 +1,16 @@
+# Deploy template referencing Helm
+parameters:
+  - name: environment
+    type: string
+  - name: imageTag
+    type: string
+
+jobs:
+  - job: helm_deploy
+    steps:
+      - script: |
+          echo "Helm upgrade --install for environment: ${{ parameters.environment }}"
+          echo "Using image tag: ${{ parameters.imageTag }}"
+          # For production: blue-green traffic shift via App Gateway
+          
+      - script: echo "Running smoke tests after deploy..."

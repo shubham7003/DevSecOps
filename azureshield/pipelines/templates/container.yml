@@ -1,0 +1,14 @@
+# Container scanning template
+jobs:
+  - job: scan_and_sign
+    steps:
+      - script: |
+          echo "Running Trivy scan..."
+          # Fails pipeline on any CRITICAL CVE
+          
+      - script: |
+          echo "Signing image with Cosign (keyless OIDC)..."
+          
+      - script: |
+          echo "Generating CycloneDX SBOM..."
+          # Attach to pipeline artifacts

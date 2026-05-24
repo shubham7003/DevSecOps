@@ -1,0 +1,16 @@
+# Gitleaks config enforcing secret detection
+[config]
+extend.useDefault = true
+
+[rules]
+  [[rules]]
+  id = "azure-connection-string"
+  description = "Azure Service Connection String"
+  regex = '(?i)Endpoint=sb://[a-zA-Z0-9-]+\.servicebus\.windows\.net/;SharedAccessKeyName=[a-zA-Z0-9-]+;SharedAccessKey=[a-zA-Z0-9+/=]+'
+
+[allowlist]
+description = "Ignore test files and example configs"
+paths = [
+  '''tests/.*''',
+  '''.*\.example.config.*'''
+]

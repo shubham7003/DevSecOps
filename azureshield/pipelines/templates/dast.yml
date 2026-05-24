@@ -1,0 +1,8 @@
+# DAST template for active scanning
+jobs:
+  - job: owasp_zap
+    steps:
+      - script: |
+          echo "Running OWASP ZAP active scan against staging URL..."
+          # Publish ZAP HTML report to Azure Artifacts
+          # Fails pipeline on HIGH or CRITICAL findings

@@ -1,0 +1,84 @@
+# Main pipeline integrating all DevSecOps templates
+trigger:
+  branches:
+    include:
+      - main
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: PreChecks
+    jobs:
+      - job: validate_policies
+        steps:
+          - script: echo "Validating branch policies..."
+
+  - stage: SAST
+    dependsOn: PreChecks
+    jobs:
+      - template: templates/sast.yml
+
+  - stage: Build
+    dependsOn: SAST
+    jobs:
+      - job: build_image
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'AzureConnectionWithManagedIdentity'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Build Docker image via ACR Tasks
+                az acr build --registry myPremiumACR --image myapp:$(Build.BuildId) src/app
+
+  - stage: ContainerScan
+    dependsOn: Build
+    jobs:
+      - template: templates/container.yml
+
+  - stage: DeployStaging
+    dependsOn: ContainerScan
+    jobs:
+      - template: templates/deploy.yml
+        parameters:
+          environment: 'staging'
+          imageTag: '$(Build.BuildId)'
+
+  - stage: DAST
+    dependsOn: DeployStaging
+    jobs:
+      - template: templates/dast.yml
+
+  - stage: ApprovalGate
+    dependsOn: DAST
+    jobs:
+      - job: manual_approval
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            inputs:
+              instructions: 'Review staging DAST results before proceeding.'
+
+  - stage: DeployProduction
+    dependsOn: ApprovalGate
+    jobs:
+      - template: templates/deploy.yml
+        parameters:
+          environment: 'production'
+          imageTag: '$(Build.BuildId)'
+
+  - stage: PostDeploy
+    dependsOn: DeployProduction
+    jobs:
+      - job: health_check
+        steps:
+          - script: |
+              echo "Running health check..."
+              # If fail, trigger auto rollback script
+              # ./scripts/rollback.sh

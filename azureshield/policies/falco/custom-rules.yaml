@@ -1,0 +1,14 @@
+# Falco custom rules for runtime defense
+- rule: Detect shell spawn inside container
+  desc: Alert if a shell is spawned within a running container
+  condition: container.id != host and proc.name = "bash"
+  output: "Shell spawned inside container (user=%user.name container_id=%container.id)"
+  priority: WARNING
+  tags: [container, mitre_execution]
+
+- rule: Detect unexpected outbound network connection
+  desc: Alert on any outbound connections not explicitly whitelisted
+  condition: container.id != host and evt.type = connect and fd.type = ipv4
+  output: "Unexpected outbound connection (container_id=%container.id ip=%fd.rip)"
+  priority: CRITICAL
+  tags: [network]

@@ -1,0 +1,18 @@
+# Pre-commit hooks for DevSecOps enforcement
+repos:
+- repo: https://github.com/Yelp/detect-secrets
+  rev: v1.4.0
+  hooks:
+    - id: detect-secrets
+      args: ['--baseline', '.secrets.baseline']
+      
+- repo: https://github.com/zricethezav/gitleaks
+  rev: v8.18.0
+  hooks:
+    - id: gitleaks
+
+- repo: https://github.com/Azure/bicep
+  rev: v0.20.4
+  hooks:
+    - id: bicep-lint
+      files: \.bicep$
